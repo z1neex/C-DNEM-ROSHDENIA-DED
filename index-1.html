@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>С днём рождения, дед Саша!</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lobster&family=Nunito:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #24103f;
+    --ink: #24103f;
+    --gold: #ffe27a;
+    --display: "Lobster", "Georgia", serif;
+    --body: "Nunito", "Trebuchet MS", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: radial-gradient(circle at 50% 45%, #3c1b66 0%, var(--bg) 65%);
+    color: #fff;
+    font-family: var(--body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 14px;
+    gap: 22px;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    max-width: 900px;
+  }
+  .btn {
+    font-family: var(--body);
+    font-weight: 800;
+    font-size: clamp(14px, 3.6vw, 18px);
+    color: var(--ink);
+    border: 0;
+    border-radius: 999px;
+    padding: 12px 18px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 rgba(0, 0, 0, .35);
+    transition: transform .12s, box-shadow .12s;
+  }
+  .btn:hover { transform: translateY(-3px) rotate(-2deg); }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, .35); }
+  .btn:focus-visible { outline: 4px solid #fff; outline-offset: 3px; }
+
+  h1 {
+    margin: 10px 0;
+    text-align: center;
+    font-family: var(--display);
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--gold);
+    font-size: clamp(2.6rem, 11vw, 6.5rem);
+    text-shadow: 0 4px 0 #b3478f, 0 10px 30px rgba(0, 0, 0, .4);
+  }
+  h1 small {
+    display: block;
+    font-size: .62em;
+    color: #fff;
+    text-shadow: 0 3px 0 #6a3aa8;
+  }
+  footer { opacity: .85; font-weight: 700; text-align: center; }
+
+  #confetti {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+  #big {
+    position: fixed; inset: 0;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 16px;
+    background: rgba(36, 16, 63, .72);
+    cursor: pointer;
+  }
+  #big.show { display: flex; }
+  #big .huge {
+    font-family: var(--display);
+    font-size: clamp(3.6rem, 19vw, 13rem);
+    line-height: 1;
+    color: var(--gold);
+    text-shadow: 0 6px 0 #b3478f, 0 0 40px rgba(255, 226, 122, .5);
+    animation: pop .6s cubic-bezier(.2, 1.6, .4, 1);
+  }
+  #big .wish {
+    margin-top: 18px;
+    font-weight: 800;
+    font-size: clamp(1.1rem, 5vw, 2rem);
+  }
+  @keyframes pop { from { transform: scale(.2) rotate(-8deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    #big .huge { animation: none; }
+    .btn { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="row" id="top"></div>
+
+<h1>С днём рождения,<small>дед Саша!</small></h1>
+
+<div class="row" id="bottom"></div>
+
+<footer>С любовью, твой внук 💛</footer>
+
+<canvas id="confetti"></canvas>
+<div id="big" role="status" aria-live="polite">
+  <div class="huge">С днём рождения!</div>
+  <div class="wish" id="wish"></div>
+</div>
+
+<script>
+  // Кнопки: [надпись, пожелание, который показывается под большой надписью]
+  const buttons = [
+    ["С днём рождения! 🎂", "Дед Саша, ты самый лучший!"],
+    ["С днём рождения! 🎉", "Пусть каждый день будет как праздник!"],
+    ["С днём рождения! 🎈", "Пусть настроение будет лёгким, как шарики!"],
+    ["С днём рождения! 🎁", "Пусть сбываются все мечты!"],
+    ["С днём рождения! 🥳", "Желаю море радости!"],
+    ["С днём рождения! 💐", "Тепла и любви тебе!"],
+    ["С днём рождения! 🌟", "Ты наша путеводная звезда!"],
+    ["С днём рождения! 🍰", "Пусть будет много вкусного торта!"],
+    ["С днём рождения! 💪", "Крепкого здоровья тебе!"],
+    ["С днём рождения! 😊", "Пусть улыбка не сходит с лица!"],
+    ["С днём рождения! 🏆", "Ты у нас чемпион!"],
+    ["С днём рождения! ❤️", "Мы тебя очень любим!"],
+    ["С днём рождения! 🎶", "Пусть в доме звучит смех!"],
+    ["С днём рождения! 🍀", "Удачи и счастья во всём!"],
+    ["С днём рождения! ☀️", "Пусть всегда светит солнце!"],
+    ["С днём рождения! 🎆", "Яркой и весёлой жизни!"]
+  ];
+  const colors = ["#ff6b8b", "#ffb347", "#7be0ad", "#6ec1ff", "#c79bff", "#fff27a"];
+
+  const topRow = document.getElementById("top");
+  const bottomRow = document.getElementById("bottom");
+  buttons.forEach(([label, wish], i) => {
+    const b = document.createElement("button");
+    b.className = "btn";
+    b.type = "button";
+    b.textContent = label;
+    b.style.background = colors[i % colors.length];
+    b.addEventListener("click", () => celebrate(wish));
+    (i < buttons.length / 2 ? topRow : bottomRow).appendChild(b);
+  });
+
+  // Большая надпись
+  const big = document.getElementById("big");
+  const wishEl = document.getElementById("wish");
+  let hideTimer;
+  function celebrate(wish) {
+    wishEl.textContent = wish;
+    big.classList.remove("show");
+    void big.offsetWidth; // перезапуск анимации
+    big.classList.add("show");
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => big.classList.remove("show"), 3600);
+    burst();
+  }
+  big.addEventListener("click", () => big.classList.remove("show"));
+
+  // Конфетти
+  const cv = document.getElementById("confetti");
+  const ctx = cv.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const palette = ["#ff6b8b", "#ffb347", "#7be0ad", "#6ec1ff", "#c79bff", "#fff27a", "#ffffff"];
+  let W, H, pieces = [], running = false;
+
+  function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    W = innerWidth; H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  addEventListener("resize", resize);
+
+  function burst() {
+    const n = reduce ? 40 : 180;
+    for (let i = 0; i < n; i++) {
+      pieces.push({
+        x: Math.random() * W,
+        y: -20 - Math.random() * H * 0.6,
+        w: 6 + Math.random() * 8,
+        h: 9 + Math.random() * 10,
+        vy: 2 + Math.random() * 3.5,
+        vx: -1 + Math.random() * 2,
+        rot: Math.random() * 6.28,
+        vr: (Math.random() - 0.5) * 0.3,
+        phase: Math.random() * 6.28,
+        color: palette[Math.floor(Math.random() * palette.length)]
+      });
+    }
+    if (!running) { running = true; requestAnimationFrame(tick); }
+  }
+
+  function tick() {
+    ctx.clearRect(0, 0, W, H);
+    pieces = pieces.filter(p => p.y < H + 30);
+    for (const p of pieces) {
+      p.phase += 0.05;
+      p.x += p.vx + Math.sin(p.phase) * 0.8;
+      p.y += p.vy;
+      p.rot += p.vr;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    if (pieces.length) requestAnimationFrame(tick);
+    else running = false;
+  }
+</script>
+</body>
+</html>
